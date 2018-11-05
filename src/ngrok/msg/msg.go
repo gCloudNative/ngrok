@@ -39,6 +39,16 @@ type Auth struct {
 	OS        string
 	Arch      string
 	ClientId  string // empty for new sessions
+	Hostname  string
+	Platform  string
+	Kernel    string
+	Hostuuid  string
+	IpAddr    string
+	CpuVendor string
+	CpuModel  string
+	CpuNum    string
+	MemStat   string
+	DiskStat  string
 }
 
 // A server responds to an Auth message with an

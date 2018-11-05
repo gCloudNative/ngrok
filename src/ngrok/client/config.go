@@ -218,6 +218,9 @@ func defaultPath() string {
 
 func normalizeAddress(addr string, propName string) (string, error) {
 	// normalize port to address
+	if strings.HasPrefix(addr, "unix://") {
+		return addr, nil
+	}
 	if _, err := strconv.Atoi(addr); err == nil {
 		addr = ":" + addr
 	}

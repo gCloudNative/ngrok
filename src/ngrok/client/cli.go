@@ -57,12 +57,12 @@ func ParseArgs() (opts *Options, err error) {
 
 	config := flag.String(
 		"config",
-		"",
+		"ngrok.cfg",
 		"Path to ngrok configuration file. (default: $HOME/.ngrok)")
 
 	logto := flag.String(
 		"log",
-		"none",
+		"stdout",
 		"Write log messages to this file. 'stdout' and 'none' have special meanings")
 
 	loglevel := flag.String(

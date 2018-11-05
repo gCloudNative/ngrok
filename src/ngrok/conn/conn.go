@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/url"
 	"ngrok/log"
+	"strings"
 	"sync"
 )
 
@@ -47,6 +48,8 @@ func wrapConn(conn net.Conn, typ string) *loggedConn {
 		wrapped := &loggedConn{c, conn, log.NewPrefixLogger(), rand.Int31(), typ}
 		wrapped.AddLogPrefix(wrapped.Id())
 		return wrapped
+	case *net.UnixConn:
+		return &loggedConn{nil, conn, log.NewPrefixLogger(), rand.Int31(), typ}
 	}
 
 	return nil
@@ -89,8 +92,13 @@ func Wrap(conn net.Conn, typ string) *loggedConn {
 
 func Dial(addr, typ string, tlsCfg *tls.Config) (conn *loggedConn, err error) {
 	var rawConn net.Conn
-	if rawConn, err = net.Dial("tcp", addr); err != nil {
-		return
+
+	if strings.HasPrefix(addr, "unix://") {
+		rawConn, err = net.DialUnix("unix", nil, &net.UnixAddr{strings.TrimPrefix(addr, "unix://"), "unix"})
+	} else {
+		if rawConn, err = net.Dial("tcp", addr); err != nil {
+			return
+		}
 	}
 
 	conn = wrapConn(rawConn, typ)

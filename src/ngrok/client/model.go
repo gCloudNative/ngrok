@@ -233,10 +233,26 @@ func (c *ClientModel) control() {
 	defer ctlConn.Close()
 
 	// authenticate with the server
+	var hostname, platform, kernel, hostuuid = util.GetHostInfo()
+	var vendor, model, cores = util.GetCpuInfo()
 	auth := &msg.Auth{
 		ClientId:  c.id,
 		OS:        runtime.GOOS,
 		Arch:      runtime.GOARCH,
+		Hostname:  hostname, // util.GetHostName(),
+		Platform:  platform,
+		Kernel:    kernel,
+		Hostuuid:  hostuuid,
+		IpAddr:    util.GetIPAddress(),
+		CpuVendor: vendor,
+		CpuModel:  model,
+		CpuNum:    cores,
+		// CpuMhz:    mhz,
+		// CpuNum:   util.GetCoreNum(),
+		// CpuMhz:    util.GetCpuMHz(),
+		// CpuMhz:    util.GetCpuInfo(),
+		MemStat:   util.GetMemStat(),
+		DiskStat:  util.GetDiskStat(),
 		Version:   version.Proto,
 		MmVersion: version.MajorMinor(),
 		User:      c.authToken,

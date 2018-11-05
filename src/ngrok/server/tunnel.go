@@ -49,6 +49,26 @@ type Tunnel struct {
 	closing int32
 }
 
+type TunnelJSON struct {
+	Req      *msg.ReqTunnel   `json:"req"`
+	Start    time.Time        `json:"start"`
+	Url      string           `json:"url"`
+	Listener *net.TCPListener `json:"listener"`
+	Ctl      *ControlJSON     `json:"ctl"`
+	Closing  int32            `json:"closing"`
+}
+
+func (t *Tunnel) NewTunnelJSON() *TunnelJSON {
+	return &TunnelJSON{
+		t.req,
+		t.start,
+		t.url,
+		t.listener,
+		t.ctl.NewControlJSON(),
+		t.closing,
+	}
+}
+
 // Common functionality for registering virtually hosted protocols
 func registerVhost(t *Tunnel, protocol string, servingPort int) (err error) {
 	vhost := os.Getenv("VHOST")

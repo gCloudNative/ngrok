@@ -60,6 +60,32 @@ type Control struct {
 	shutdown *util.Shutdown
 }
 
+type ControlJSON struct {
+	Auth            *msg.Auth      `json:"auth"`
+	Conn            conn.Conn      `json:"conn"`
+	LastPing        time.Time      `json:"lastPing"`
+	Tunnels         []*Tunnel      `json:"tunnels"`
+	Id              string         `json:"id"`
+	WriterShutdown  *util.Shutdown `json:"writerShutdown"`
+	ReaderShutdown  *util.Shutdown `json:"readerShutdown"`
+	ManagerShutdown *util.Shutdown `json:"managerShutdown"`
+	Shutdown        *util.Shutdown `json:"shutdown"`
+}
+
+func (c *Control) NewControlJSON() *ControlJSON {
+	return &ControlJSON{
+		c.auth,
+		c.conn,
+		c.lastPing,
+		c.tunnels,
+		c.id,
+		c.writerShutdown,
+		c.readerShutdown,
+		c.managerShutdown,
+		c.shutdown,
+	}
+}
+
 func NewControl(ctlConn conn.Conn, authMsg *msg.Auth) {
 	var err error
 

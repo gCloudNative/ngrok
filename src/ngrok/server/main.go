@@ -2,7 +2,10 @@ package server
 
 import (
 	"crypto/tls"
+	"encoding/json"
+	"fmt"
 	"math/rand"
+	"net/http"
 	"ngrok/conn"
 	log "ngrok/log"
 	"ngrok/msg"
@@ -134,6 +137,25 @@ func Main() {
 	// listen for https
 	if opts.httpsAddr != "" {
 		listeners["https"] = startHttpListener(opts.httpsAddr, tlsConfig)
+	}
+
+	if opts.apiAddr != "" {
+		go func() {
+			http.HandleFunc("/tunnels", func(w http.ResponseWriter, r *http.Request) {
+				tunnelJSONMap := make(map[string]*TunnelJSON)
+				for k, v := range tunnelRegistry.tunnels {
+					tunnelJSONMap[k] = v.NewTunnelJSON()
+				}
+
+				data, _ := json.Marshal(struct {
+					//Control map[string]*ControlJSON
+					Tunnels map[string]*TunnelJSON
+				}{tunnelJSONMap})
+				fmt.Fprintf(w, string(data))
+			})
+			log.Info("Listening for API on %s", opts.apiAddr)
+			log.Error("Failed to start api server: ", http.ListenAndServe(opts.apiAddr, nil))
+		}()
 	}
 
 	// ngrok clients

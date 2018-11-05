@@ -1,4 +1,9 @@
 # Changelog
+
+## 1.8 - 2/4/2017
+- Support unix
+  ./bin/ngrok -proto=tcp -config=ngrok.cfg unix:///var/run/docker.sock
+
 ## 1.7 - 6/6/2014
 - IMPROVEMENT: Print a better help message when run without any arguments
 - IMPROVEMENT: Display useful help message and instructions when double-clicked from explorer on Windows

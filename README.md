@@ -9,6 +9,23 @@ status](https://travis-ci.org/inconshreveable/ngrok.svg)](https://travis-ci.org/
 ngrok is a reverse proxy that creates a secure tunnel from a public endpoint to a locally running web service.
 ngrok captures and analyzes all traffic over the tunnel for later inspection and replay.
 
+## How to build ngrok and launch
+```
+git clone https://github.com/inconshreveable/ngrok.git ngrok
+cd ngrok/
+export NGROK_BASE_DOMAIN=tunnel.yangsen.com
+openssl req -new -x509 -nodes -key base.key -days 10000 -subj "/CN=$NGROK_BASE_DOMAIN" -out base.pem
+openssl genrsa -out server.key 2048
+openssl req -new -key server.key -subj "/CN=$NGROK_BASE_DOMAIN" -out server.csr
+openssl x509 -req -in server.csr -CA base.pem -CAkey base.key -CAcreateserial -days 10000 -out server.crt
+
+cp base.pem assets/client/tls/ngrokroot.crt
+
+make release-server release-client
+bin/ngrokd -tlsKey=server.key -tlsCrt=server.crt -domain="$NGROK_BASE_DOMAIN" -httpAddr=":18080" -httpsAddr=":18081"
+
+```
+
 ## ngrok 2.x
 
 ngrok 2.x is the successor to 1.x and the focus of all current development effort. Its source code is not available.
@@ -48,3 +65,47 @@ ngrok.com ran a pay-what-you-want hosted service of 1.x from early 2013 until Ap
 
 ## Developing on ngrok
 [ngrok developer's guide](docs/DEVELOPMENT.md)
+
+
+
+
+
+
+
+
+####Command Guide
+
+* build
+```
+using ngrok server "ngrok-test.chinacloudapp.cn" for example
+cd ngrok
+export NGROK_DOMAIN="ngrok-test.chinacloudapp.cn";openssl genrsa -out base.key 2048;openssl req -new -x509 -nodes -key base.key -days 10000 -subj "/CN=$NGROK_DOMAIN" -out base.pem;openssl genrsa -out server.key 2048;openssl req -new -key server.key -subj "/CN=$NGROK_DOMAIN" -out server.csr;openssl x509 -req -in server.csr -CA base.pem -CAkey base.key -CAcreateserial -days 10000 -out server.crt;cp base.pem assets/client/tls/ngrokroot.crt;cp server.crt assets/server/tls/snakeoil.crt;cp server.key assets/server/tls/snakeoil.key;
+
+
+#for debug
+make server client
+#for release
+make release-server release-client
+```
+
+* run
+for server
+```
+export NGROK_TOKENS_FILE=/home/azure/ngrok/tokens.txt
+./bin/ngrokd -tlsKey=server.key -tlsCrt=server.crt -domain="ngrok-test.chinacloudapp.cn" -tunnelAddr=":4443" -httpAddr=":8081" -httpsAddr=":8082" -apiAddr=":8080"
+```
+
+
+for client
+```
+cat <<EOF > ngrok.cfg
+server_addr: ngrok-test.chinacloudapp.cn:4443
+trust_host_root_certs: false
+EOF
+./bin/ngrok -proto=tcp -config=ngrok.cfg -authtoken=uuid -hostname=`hostname` unix:///var/run/docker.sock
+```
+
+* check connected tunnels
+```
+curl 127.0.0.1:8080/tunnels | python -m json.tool
+```
